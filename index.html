@@ -3,26 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Professional VAST Inspector for QA testing video advertisements. Track clicks, impressions, and ad events in real-time.">
+  <meta name="theme-color" content="#0f172a">
   <title>VAST Inspector - QA Testing Tool</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
   <div class="container">
     <!-- Header -->
-    <header class="header">
-      <h1>🎬 VAST Inspector</h1>
-      <p class="subtitle">Video Ad Serving Template QA Testing Tool</p>
+    <header class="header" role="banner">
+      <div class="header-content">
+        <h1><i class="fas fa-film"></i> VAST Inspector</h1>
+        <p class="subtitle">Video Ad Serving Template QA Testing Tool</p>
+      </div>
     </header>
 
     <!-- Input Section -->
-    <section class="input-section">
+    <section class="input-section" role="region" aria-label="VAST input configuration">
+      <div class="section-header">
+        <h2><i class="fas fa-upload"></i> Input Configuration</h2>
+      </div>
+
       <div class="input-mode">
         <label class="radio-label">
-          <input type="radio" name="input-mode" id="input-url" checked>
+          <input type="radio" name="input-mode" id="input-url" checked aria-label="VAST URL input mode">
+          <i class="fas fa-link"></i>
           <span>VAST URL</span>
         </label>
         <label class="radio-label">
-          <input type="radio" name="input-mode" id="input-xml">
+          <input type="radio" name="input-mode" id="input-xml" aria-label="VAST XML input mode">
+          <i class="fas fa-code"></i>
           <span>VAST XML</span>
         </label>
       </div>
@@ -33,6 +52,7 @@
           class="input-field"
           placeholder="Enter VAST tag URL here...&#10;Example: https://example.com/vast.xml"
           rows="3"
+          aria-label="VAST URL input"
         ></textarea>
 
         <textarea
@@ -41,29 +61,43 @@
           placeholder="Paste VAST XML here...&#10;<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#10;<VAST version=&quot;3.0&quot;>&#10;  ...&#10;</VAST>"
           rows="8"
           style="display: none;"
+          aria-label="VAST XML input"
         ></textarea>
       </div>
 
       <div class="button-group">
-        <button id="test-button" class="btn btn-primary">Test Ad</button>
-        <button id="clear-button" class="btn btn-secondary">Clear All</button>
+        <button id="test-button" class="btn btn-primary" aria-label="Test ad">
+          <i class="fas fa-play-circle"></i>
+          <span>Test Ad</span>
+        </button>
+        <button id="clear-button" class="btn btn-secondary" aria-label="Clear all data">
+          <i class="fas fa-eraser"></i>
+          <span>Clear All</span>
+        </button>
       </div>
 
-      <div id="status" class="status"></div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="loading" class="loading-spinner" style="display: none;" role="status" aria-label="Loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Processing VAST...</span>
+      </div>
     </section>
 
     <!-- Main Content -->
     <div class="main-content">
       <!-- Left Column: Video Player -->
       <div class="left-column">
-        <section class="player-section">
-          <h2>Video Ad Player</h2>
+        <section class="player-section" role="region" aria-label="Video player">
+          <div class="section-header">
+            <h2><i class="fas fa-play-circle"></i> Video Ad Player</h2>
+          </div>
           <div class="video-container">
             <video
               id="ad-video"
               class="video-player"
               controls
               preload="metadata"
+              aria-label="VAST video player"
               poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360'%3E%3Crect fill='%23333' width='640' height='360'/%3E%3Ctext fill='%23999' font-family='Arial' font-size='24' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EVideo ad will appear here%3C/text%3E%3C/svg%3E"
             >
               Your browser does not support the video tag.
@@ -72,26 +106,28 @@
         </section>
 
         <!-- VAST Info -->
-        <section class="info-section">
+        <section class="info-section" role="region" aria-label="VAST information">
           <div id="vast-info"></div>
         </section>
 
         <!-- Event Log -->
-        <section class="log-section">
-          <h2>Event Log</h2>
-          <div id="event-log" class="event-log"></div>
+        <section class="log-section" role="region" aria-label="Event log">
+          <div class="section-header">
+            <h2><i class="fas fa-list-alt"></i> Event Log</h2>
+          </div>
+          <div id="event-log" class="event-log" aria-live="polite"></div>
         </section>
       </div>
 
       <!-- Right Column: Tracking Info -->
       <div class="right-column">
         <!-- Tracking URLs -->
-        <section class="tracking-section">
+        <section class="tracking-section" role="region" aria-label="Tracking URLs">
           <div id="tracking-urls" class="tracking-urls"></div>
         </section>
 
         <!-- Tracking Pixels -->
-        <section class="pixels-section">
+        <section class="pixels-section" role="region" aria-label="Tracking pixels">
           <div id="tracking-pixels" class="tracking-pixels"></div>
         </section>
       </div>

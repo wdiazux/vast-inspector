@@ -248,14 +248,24 @@ class VASTParser {
     // Parse MediaFiles
     const mediaFileElements = linearElement.querySelectorAll('MediaFile');
     mediaFileElements.forEach(mf => {
+      const apiFramework = mf.getAttribute('apiFramework');
+      const type = mf.getAttribute('type') || null;
+
+      // Detect VPAID
+      const isVPAID = apiFramework === 'VPAID' ||
+                      type === 'application/x-shockwave-flash' ||
+                      type === 'application/javascript';
+
       linear.mediaFiles.push({
         id: mf.getAttribute('id') || null,
         delivery: mf.getAttribute('delivery') || 'progressive',
-        type: mf.getAttribute('type') || null,
+        type: type,
         width: mf.getAttribute('width') || null,
         height: mf.getAttribute('height') || null,
         codec: mf.getAttribute('codec') || null,
         bitrate: mf.getAttribute('bitrate') || null,
+        apiFramework: apiFramework || null,
+        isVPAID: isVPAID,
         url: mf.textContent.trim()
       });
     });

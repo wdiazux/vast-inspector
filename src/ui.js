@@ -159,6 +159,9 @@ class UIController {
 
       const linearCreative = ad.inline.creatives.find(c => c.type === 'linear');
       if (linearCreative) {
+        // Check for VPAID creatives
+        const hasVPAID = linearCreative.data.mediaFiles.some(mf => mf.isVPAID);
+
         html += `
           <div class="info-item">
             <strong><i class="fas fa-clock"></i> Duration:</strong> ${linearCreative.data.duration || 'N/A'}
@@ -167,6 +170,18 @@ class UIController {
             <strong><i class="fas fa-file-video"></i> Media Files:</strong> ${linearCreative.data.mediaFiles.length}
           </div>
         `;
+
+        // Show VPAID warning
+        if (hasVPAID) {
+          html += `
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <div class="warning-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>VPAID Detected:</strong> This VAST tag contains VPAID creatives. VPAID ads require a compatible player and won't execute in this basic inspector.
+              </div>
+            </div>
+          `;
+        }
 
         // Add device-specific media file breakdown
         const deviceTypes = this.categorizeMediaFilesByDevice(linearCreative.data.mediaFiles);
@@ -268,16 +283,22 @@ class UIController {
             parseFloat(aspectRatio) || 0
           );
 
+          // Check if VPAID
+          const vpaidBadge = mf.isVPAID ? '<span class="vpaid-badge"><i class="fas fa-code"></i> VPAID</span>' : '';
+          const apiFramework = mf.apiFramework ? `<span><strong>API:</strong> ${mf.apiFramework}</span>` : '';
+
           html += `
-            <div class="media-file-item">
+            <div class="media-file-item ${mf.isVPAID ? 'vpaid-creative' : ''}">
               <div class="media-file-header">
                 <span class="media-file-index">#${index + 1}</span>
                 <span class="device-badge device-${deviceType.toLowerCase().replace(/[^a-z]/g, '')}">${deviceType}</span>
+                ${vpaidBadge}
               </div>
               <div class="media-file-details">
                 <span><strong>Type:</strong> ${type}</span>
                 <span><strong>Size:</strong> ${width}x${height} (${aspectRatio}:1)</span>
                 <span><strong>Bitrate:</strong> ${bitrate}</span>
+                ${apiFramework}
               </div>
               <div class="media-file-url">${this.truncateURL(mf.url, 80)}</div>
             </div>
@@ -307,11 +328,20 @@ class UIController {
       `;
       tracking.impressions.forEach(imp => {
         const url = typeof imp === 'string' ? imp : imp.url;
+
+        // Validate URL
+        if (!this.validateURL(url)) {
+          console.warn('Invalid impression URL:', url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(url);
+        const displayURL = this.truncateURL(url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
-            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -327,13 +357,22 @@ class UIController {
       `;
       tracking.clicks.forEach(click => {
         const url = typeof click === 'string' ? click : click.url;
+
+        // Validate URL
+        if (!this.validateURL(url)) {
+          console.warn('Invalid click URL:', url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(url);
         const type = click.type || 'click';
+        const displayURL = this.truncateURL(url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
             <span class="tracking-type"><i class="fas fa-tag"></i> ${type}</span>
-            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -348,12 +387,20 @@ class UIController {
           <ul class="url-list">
       `;
       tracking.tracking.forEach(track => {
+        // Validate URL
+        if (!this.validateURL(track.url)) {
+          console.warn('Invalid tracking URL:', track.url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(track.url);
+        const displayURL = this.truncateURL(track.url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${track.url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
             <span class="tracking-type"><i class="fas fa-bolt"></i> ${track.event}</span>
-            <a href="${track.url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(track.url)}</a>
+            <a href="${track.url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -368,11 +415,19 @@ class UIController {
           <ul class="url-list">
       `;
       tracking.errors.forEach(url => {
+        // Validate URL
+        if (!this.validateURL(url)) {
+          console.warn('Invalid error URL:', url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(url);
+        const displayURL = this.truncateURL(url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
-            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -492,8 +547,55 @@ class UIController {
    * Truncate URL for display
    */
   truncateURL(url, maxLength = 80) {
+    if (!url) return '';
+
+    // Decode URL for better readability
+    try {
+      url = decodeURIComponent(url);
+    } catch (e) {
+      // If decoding fails, use original URL
+      console.warn('Failed to decode URL:', url);
+    }
+
     if (url.length <= maxLength) return url;
     return url.substring(0, maxLength - 3) + '...';
+  }
+
+  /**
+   * Safely encode URL if needed
+   */
+  encodeURLSafely(url) {
+    if (!url) return '';
+
+    try {
+      // Check if URL is already encoded by trying to decode it
+      const decoded = decodeURIComponent(url);
+      // If decoding changes the URL, it was encoded
+      if (decoded !== url) {
+        return url; // Already encoded
+      }
+      // Otherwise encode it
+      return encodeURIComponent(url);
+    } catch (e) {
+      // If decoding fails, assume it's not properly encoded
+      return url;
+    }
+  }
+
+  /**
+   * Validate and sanitize tracking URL
+   */
+  validateURL(url) {
+    if (!url || typeof url !== 'string') return false;
+
+    try {
+      // Try to create a URL object to validate
+      new URL(url);
+      return true;
+    } catch (e) {
+      console.warn('Invalid URL:', url, e);
+      return false;
+    }
   }
 }
 

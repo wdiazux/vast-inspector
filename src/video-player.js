@@ -6,6 +6,7 @@ class VideoPlayer {
   constructor(videoElement, tracker) {
     this.video = videoElement;
     this.tracker = tracker;
+    this.clickOverlay = document.getElementById('video-click-overlay');
     this.vastData = null;
     this.trackingURLs = null;
     this.quartilesFired = {
@@ -17,6 +18,7 @@ class VideoPlayer {
     };
     this.eventLog = [];
     this.listeners = [];
+    this.overlayListeners = [];
   }
 
   /**
@@ -60,6 +62,11 @@ class VideoPlayer {
     this.video.src = mediaFile.url;
     this.setupEventListeners();
 
+    // Enable click overlay for click tracking
+    if (this.clickOverlay) {
+      this.clickOverlay.classList.remove('disabled');
+    }
+
     this.logEvent('ad-loaded', `Ad loaded: ${ad.inline.adTitle || 'Untitled'}`);
 
     // Fire impression trackers with initial context
@@ -100,7 +107,7 @@ class VideoPlayer {
     // Remove old listeners
     this.removeEventListeners();
 
-    // Video events
+    // Video events (no click - using overlay instead)
     const events = {
       'loadedmetadata': () => this.onLoadedMetadata(),
       'play': () => this.onPlay(),
@@ -108,13 +115,22 @@ class VideoPlayer {
       'ended': () => this.onEnded(),
       'error': (e) => this.onError(e),
       'timeupdate': () => this.onTimeUpdate(),
-      'volumechange': () => this.onVolumeChange(),
-      'click': () => this.onClick()
+      'volumechange': () => this.onVolumeChange()
     };
 
     for (const [event, handler] of Object.entries(events)) {
       this.video.addEventListener(event, handler);
       this.listeners.push({ event, handler });
+    }
+
+    // Attach click to overlay for reliable click tracking
+    if (this.clickOverlay) {
+      const clickHandler = (e) => {
+        e.preventDefault();
+        this.onClick();
+      };
+      this.clickOverlay.addEventListener('click', clickHandler);
+      this.overlayListeners.push({ event: 'click', handler: clickHandler });
     }
   }
 
@@ -126,6 +142,14 @@ class VideoPlayer {
       this.video.removeEventListener(event, handler);
     });
     this.listeners = [];
+
+    // Remove overlay listeners
+    if (this.clickOverlay) {
+      this.overlayListeners.forEach(({ event, handler }) => {
+        this.clickOverlay.removeEventListener(event, handler);
+      });
+      this.overlayListeners = [];
+    }
   }
 
   /**
@@ -326,6 +350,12 @@ class VideoPlayer {
     this.pause();
     this.video.src = '';
     this.removeEventListeners();
+
+    // Disable click overlay
+    if (this.clickOverlay) {
+      this.clickOverlay.classList.add('disabled');
+    }
+
     this.vastData = null;
     this.trackingURLs = null;
     this.quartilesFired = {

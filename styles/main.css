@@ -893,6 +893,55 @@ code, pre, .event-log, .input-field, .media-file-url {
   border-top: 1px solid var(--border-color);
 }
 
+/* Warning Banner */
+.warning-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.05));
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  border-left: 4px solid var(--warning-color);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--warning-light);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.warning-banner i {
+  font-size: 1.5rem;
+  color: var(--warning-color);
+}
+
+.warning-banner strong {
+  color: var(--warning-light);
+  margin-right: var(--spacing-sm);
+}
+
+/* VPAID Badge */
+.vpaid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1));
+  color: var(--warning-light);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vpaid-badge i {
+  font-size: 0.875rem;
+}
+
+.media-file-item.vpaid-creative {
+  border-left: 3px solid var(--warning-color);
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.05), transparent);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {

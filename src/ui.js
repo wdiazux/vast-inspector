@@ -159,6 +159,9 @@ class UIController {
 
       const linearCreative = ad.inline.creatives.find(c => c.type === 'linear');
       if (linearCreative) {
+        // Check for VPAID creatives
+        const hasVPAID = linearCreative.data.mediaFiles.some(mf => mf.isVPAID);
+
         html += `
           <div class="info-item">
             <strong><i class="fas fa-clock"></i> Duration:</strong> ${linearCreative.data.duration || 'N/A'}
@@ -167,6 +170,18 @@ class UIController {
             <strong><i class="fas fa-file-video"></i> Media Files:</strong> ${linearCreative.data.mediaFiles.length}
           </div>
         `;
+
+        // Show VPAID warning
+        if (hasVPAID) {
+          html += `
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <div class="warning-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>VPAID Detected:</strong> This VAST tag contains VPAID creatives. VPAID ads require a compatible player and won't execute in this basic inspector.
+              </div>
+            </div>
+          `;
+        }
 
         // Add device-specific media file breakdown
         const deviceTypes = this.categorizeMediaFilesByDevice(linearCreative.data.mediaFiles);
@@ -268,16 +283,22 @@ class UIController {
             parseFloat(aspectRatio) || 0
           );
 
+          // Check if VPAID
+          const vpaidBadge = mf.isVPAID ? '<span class="vpaid-badge"><i class="fas fa-code"></i> VPAID</span>' : '';
+          const apiFramework = mf.apiFramework ? `<span><strong>API:</strong> ${mf.apiFramework}</span>` : '';
+
           html += `
-            <div class="media-file-item">
+            <div class="media-file-item ${mf.isVPAID ? 'vpaid-creative' : ''}">
               <div class="media-file-header">
                 <span class="media-file-index">#${index + 1}</span>
                 <span class="device-badge device-${deviceType.toLowerCase().replace(/[^a-z]/g, '')}">${deviceType}</span>
+                ${vpaidBadge}
               </div>
               <div class="media-file-details">
                 <span><strong>Type:</strong> ${type}</span>
                 <span><strong>Size:</strong> ${width}x${height} (${aspectRatio}:1)</span>
                 <span><strong>Bitrate:</strong> ${bitrate}</span>
+                ${apiFramework}
               </div>
               <div class="media-file-url">${this.truncateURL(mf.url, 80)}</div>
             </div>

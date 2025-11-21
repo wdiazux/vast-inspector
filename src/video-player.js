@@ -62,8 +62,9 @@ class VideoPlayer {
 
     this.logEvent('ad-loaded', `Ad loaded: ${ad.inline.adTitle || 'Untitled'}`);
 
-    // Fire impression trackers
-    this.tracker.fireImpressions(this.trackingURLs.impressions);
+    // Fire impression trackers with initial context
+    const context = this.getVideoContext();
+    this.tracker.fireImpressions(this.trackingURLs.impressions, context);
 
     return true;
   }
@@ -135,12 +136,32 @@ class VideoPlayer {
     this.logEvent('loaded-metadata', `Duration: ${this.video.duration.toFixed(2)}s`);
   }
 
+  /**
+   * Get current video context for macro replacement
+   */
+  getVideoContext() {
+    const currentTime = this.video.currentTime || 0;
+    const hours = Math.floor(currentTime / 3600);
+    const minutes = Math.floor((currentTime % 3600) / 60);
+    const seconds = Math.floor(currentTime % 60);
+    const milliseconds = Math.floor((currentTime % 1) * 1000);
+
+    return {
+      videoTime: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`,
+      assetURI: this.video.src || '',
+      playerWidth: this.video.videoWidth || this.video.clientWidth || '',
+      playerHeight: this.video.videoHeight || this.video.clientHeight || '',
+      playerSize: `${this.video.videoWidth || this.video.clientWidth || ''}x${this.video.videoHeight || this.video.clientHeight || ''}`
+    };
+  }
+
   onPlay() {
     this.logEvent('play', 'Video started playing');
 
     // Fire start tracking
     if (!this.quartilesFired.start) {
-      this.tracker.fireEventTrackers('start', this.trackingURLs.tracking);
+      const context = this.getVideoContext();
+      this.tracker.fireEventTrackers('start', this.trackingURLs.tracking, context);
       this.quartilesFired.start = true;
       this.logEvent('tracking', 'Fired start tracking');
     }
@@ -149,7 +170,8 @@ class VideoPlayer {
   onPause() {
     if (!this.video.ended) {
       this.logEvent('pause', 'Video paused');
-      this.tracker.fireEventTrackers('pause', this.trackingURLs.tracking);
+      const context = this.getVideoContext();
+      this.tracker.fireEventTrackers('pause', this.trackingURLs.tracking, context);
     }
   }
 
@@ -157,7 +179,8 @@ class VideoPlayer {
     this.logEvent('ended', 'Video completed');
 
     if (!this.quartilesFired.complete) {
-      this.tracker.fireEventTrackers('complete', this.trackingURLs.tracking);
+      const context = this.getVideoContext();
+      this.tracker.fireEventTrackers('complete', this.trackingURLs.tracking, context);
       this.quartilesFired.complete = true;
       this.logEvent('tracking', 'Fired complete tracking');
     }
@@ -198,38 +221,41 @@ class VideoPlayer {
     if (!this.video.duration) return;
 
     const progress = this.video.currentTime / this.video.duration;
+    const context = this.getVideoContext();
 
     // Fire quartile events
     if (progress >= 0.25 && !this.quartilesFired.firstQuartile) {
-      this.tracker.fireEventTrackers('firstQuartile', this.trackingURLs.tracking);
+      this.tracker.fireEventTrackers('firstQuartile', this.trackingURLs.tracking, context);
       this.quartilesFired.firstQuartile = true;
       this.logEvent('tracking', 'Fired first quartile tracking (25%)');
     } else if (progress >= 0.5 && !this.quartilesFired.midpoint) {
-      this.tracker.fireEventTrackers('midpoint', this.trackingURLs.tracking);
+      this.tracker.fireEventTrackers('midpoint', this.trackingURLs.tracking, context);
       this.quartilesFired.midpoint = true;
       this.logEvent('tracking', 'Fired midpoint tracking (50%)');
     } else if (progress >= 0.75 && !this.quartilesFired.thirdQuartile) {
-      this.tracker.fireEventTrackers('thirdQuartile', this.trackingURLs.tracking);
+      this.tracker.fireEventTrackers('thirdQuartile', this.trackingURLs.tracking, context);
       this.quartilesFired.thirdQuartile = true;
       this.logEvent('tracking', 'Fired third quartile tracking (75%)');
     }
   }
 
   onVolumeChange() {
+    const context = this.getVideoContext();
     if (this.video.muted) {
       this.logEvent('mute', 'Video muted');
-      this.tracker.fireEventTrackers('mute', this.trackingURLs.tracking);
+      this.tracker.fireEventTrackers('mute', this.trackingURLs.tracking, context);
     } else {
       this.logEvent('unmute', `Volume: ${Math.round(this.video.volume * 100)}%`);
-      this.tracker.fireEventTrackers('unmute', this.trackingURLs.tracking);
+      this.tracker.fireEventTrackers('unmute', this.trackingURLs.tracking, context);
     }
   }
 
   onClick() {
     this.logEvent('click', 'Video clicked');
 
-    // Fire click trackers
-    this.tracker.fireClicks(this.trackingURLs.clicks);
+    // Fire click trackers with context
+    const context = this.getVideoContext();
+    this.tracker.fireClicks(this.trackingURLs.clicks, context);
 
     // Open click-through URL
     const ad = this.vastData.ads.find(a => a.type === 'inline');

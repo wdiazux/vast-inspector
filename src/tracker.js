@@ -120,26 +120,53 @@ class Tracker {
   }
 
   /**
-   * Send tracking request
+   * Send tracking request using modern Beacon API with Image fallback
    * @param {string} url - URL to send
+   * @returns {Promise<boolean>} Success status
    */
   async sendTracking(url) {
     return new Promise((resolve, reject) => {
-      // Use Image object for tracking pixels (most reliable method)
+      let success = false;
+
+      // Method 1: Try sendBeacon API first (modern browsers, most reliable)
+      // Beacon API guarantees delivery even if page is unloading
+      if (navigator.sendBeacon) {
+        try {
+          success = navigator.sendBeacon(url);
+          if (success) {
+            console.log(`[Tracker] Sent via Beacon API: ${url.substring(0, 60)}...`);
+            resolve(true);
+            return;
+          }
+        } catch (e) {
+          console.warn('[Tracker] Beacon API failed, falling back to Image:', e);
+        }
+      }
+
+      // Method 2: Fallback to Image object (universal compatibility)
+      // Best approach for tracking pixels according to industry best practices
       const img = new Image();
 
-      img.onload = () => resolve(true);
-      img.onerror = () => {
-        // Even if the image fails to load, the request was sent
-        // This is normal for tracking pixels that return 1x1 transparent GIFs
+      img.onload = () => {
+        console.log(`[Tracker] Sent via Image: ${url.substring(0, 60)}...`);
         resolve(true);
       };
 
-      // Set a timeout
+      img.onerror = () => {
+        // Even if image fails to load, the request was sent successfully
+        // Tracking pixels often return HTTP 204 No Content (no pixel data)
+        // or 1x1 transparent GIF
+        console.log(`[Tracker] Sent via Image (no content): ${url.substring(0, 60)}...`);
+        resolve(true);
+      };
+
+      // Set a timeout to prevent hanging
       setTimeout(() => {
+        console.log(`[Tracker] Timeout (assuming success): ${url.substring(0, 60)}...`);
         resolve(true); // Assume success after timeout
       }, 5000);
 
+      // Fire the tracking pixel
       img.src = url;
     });
   }

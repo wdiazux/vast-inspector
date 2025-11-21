@@ -4,7 +4,22 @@
 
 This document explains how click tracking works in the VAST Inspector and how to test it.
 
+**IMPORTANT**: This guide covers **desktop and mobile (OTT)** click tracking only. **CTV/OTT devices (Roku, Fire TV, Apple TV, etc.) do NOT support click tracking** - they use QR codes instead. See [CTV-QR-CODE-TRACKING.md](./CTV-QR-CODE-TRACKING.md) for CTV-specific information.
+
 **Last Updated**: November 21, 2025
+
+---
+
+## Platform Support
+
+| Platform | Click Tracking | Engagement Method |
+|----------|---------------|-------------------|
+| 💻 Desktop | ✅ Supported | Mouse click |
+| 📱 Mobile | ✅ Supported | Finger tap |
+| 📱 Tablet | ✅ Supported | Finger tap |
+| 📺 CTV/OTT (Roku, Fire TV, etc.) | ❌ Not Supported | **QR code scanning** |
+
+**Why CTV doesn't support clicks**: CTV devices use remote controls (directional pad + OK button), not cursors. Users can't "click" on specific areas of the video. QR codes are the industry standard for CTV engagement.
 
 ---
 

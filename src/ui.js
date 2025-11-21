@@ -134,13 +134,13 @@ class UIController {
     if (!ad) return;
 
     let html = `
-      <h3>VAST Information</h3>
+      <h3><i class="fas fa-info-circle"></i> VAST Information</h3>
       <div class="info-grid">
         <div class="info-item">
-          <strong>Version:</strong> ${result.version}
+          <strong><i class="fas fa-code-branch"></i> Version:</strong> ${result.version}
         </div>
         <div class="info-item">
-          <strong>Ad Type:</strong> ${ad.type}
+          <strong><i class="fas fa-tag"></i> Ad Type:</strong> ${ad.type}
         </div>
     `;
 
@@ -161,10 +161,10 @@ class UIController {
       if (linearCreative) {
         html += `
           <div class="info-item">
-            <strong>Duration:</strong> ${linearCreative.data.duration || 'N/A'}
+            <strong><i class="fas fa-clock"></i> Duration:</strong> ${linearCreative.data.duration || 'N/A'}
           </div>
           <div class="info-item">
-            <strong>Media Files:</strong> ${linearCreative.data.mediaFiles.length}
+            <strong><i class="fas fa-file-video"></i> Media Files:</strong> ${linearCreative.data.mediaFiles.length}
           </div>
         `;
 
@@ -173,7 +173,7 @@ class UIController {
         if (deviceTypes.length > 0) {
           html += `
             <div class="info-item" style="grid-column: 1 / -1;">
-              <strong>Device Support:</strong> ${deviceTypes.join(', ')}
+              <strong><i class="fas fa-mobile-alt"></i> Device Support:</strong> ${deviceTypes.join(', ')}
             </div>
           `;
         }
@@ -296,13 +296,13 @@ class UIController {
    * Display tracking URLs
    */
   displayTrackingURLs(tracking) {
-    let html = '<h3>Tracking URLs</h3>';
+    let html = '<h3><i class="fas fa-link"></i> Tracking URLs</h3>';
 
     // Impressions
     if (tracking.impressions.length > 0) {
       html += `
         <div class="tracking-section">
-          <h4>Impressions (${tracking.impressions.length})</h4>
+          <h4><i class="fas fa-eye"></i> Impressions (${tracking.impressions.length})</h4>
           <ul class="url-list">
       `;
       tracking.impressions.forEach(imp => {
@@ -310,8 +310,8 @@ class UIController {
         const fired = this.tracker.hasFired(url);
         html += `
           <li class="${fired ? 'fired' : ''}">
-            <span class="status-icon">${fired ? '✓' : '○'}</span>
-            <a href="${url}" target="_blank" class="url-link">${this.truncateURL(url)}</a>
+            <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
           </li>
         `;
       });
@@ -322,7 +322,7 @@ class UIController {
     if (tracking.clicks.length > 0) {
       html += `
         <div class="tracking-section">
-          <h4>Click Tracking (${tracking.clicks.length})</h4>
+          <h4><i class="fas fa-mouse-pointer"></i> Click Tracking (${tracking.clicks.length})</h4>
           <ul class="url-list">
       `;
       tracking.clicks.forEach(click => {
@@ -331,9 +331,9 @@ class UIController {
         const type = click.type || 'click';
         html += `
           <li class="${fired ? 'fired' : ''}">
-            <span class="status-icon">${fired ? '✓' : '○'}</span>
-            <span class="tracking-type">[${type}]</span>
-            <a href="${url}" target="_blank" class="url-link">${this.truncateURL(url)}</a>
+            <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
+            <span class="tracking-type"><i class="fas fa-tag"></i> ${type}</span>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
           </li>
         `;
       });
@@ -344,16 +344,16 @@ class UIController {
     if (tracking.tracking.length > 0) {
       html += `
         <div class="tracking-section">
-          <h4>Event Tracking (${tracking.tracking.length})</h4>
+          <h4><i class="fas fa-chart-line"></i> Event Tracking (${tracking.tracking.length})</h4>
           <ul class="url-list">
       `;
       tracking.tracking.forEach(track => {
         const fired = this.tracker.hasFired(track.url);
         html += `
           <li class="${fired ? 'fired' : ''}">
-            <span class="status-icon">${fired ? '✓' : '○'}</span>
-            <span class="tracking-type">[${track.event}]</span>
-            <a href="${track.url}" target="_blank" class="url-link">${this.truncateURL(track.url)}</a>
+            <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
+            <span class="tracking-type"><i class="fas fa-bolt"></i> ${track.event}</span>
+            <a href="${track.url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(track.url)}</a>
           </li>
         `;
       });
@@ -364,15 +364,15 @@ class UIController {
     if (tracking.errors.length > 0) {
       html += `
         <div class="tracking-section">
-          <h4>Error Tracking (${tracking.errors.length})</h4>
+          <h4><i class="fas fa-exclamation-triangle"></i> Error Tracking (${tracking.errors.length})</h4>
           <ul class="url-list">
       `;
       tracking.errors.forEach(url => {
         const fired = this.tracker.hasFired(url);
         html += `
           <li class="${fired ? 'fired' : ''}">
-            <span class="status-icon">${fired ? '✓' : '○'}</span>
-            <a href="${url}" target="_blank" class="url-link">${this.truncateURL(url)}</a>
+            <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
           </li>
         `;
       });
@@ -393,11 +393,11 @@ class UIController {
     const log = this.tracker.getLog();
 
     let html = `
-      <h3>Tracking Pixels</h3>
+      <h3><i class="fas fa-image"></i> Tracking Pixels</h3>
       <div class="stats">
-        <span>Total: ${stats.total}</span>
-        <span class="success">Success: ${stats.success}</span>
-        <span class="failed">Failed: ${stats.failed}</span>
+        <span><i class="fas fa-layer-group"></i> Total: ${stats.total}</span>
+        <span class="success"><i class="fas fa-check"></i> Success: ${stats.success}</span>
+        <span class="failed"><i class="fas fa-times"></i> Failed: ${stats.failed}</span>
       </div>
       <div class="pixels-grid">
     `;

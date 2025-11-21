@@ -227,31 +227,40 @@ class UIController {
 
   /**
    * Detect device type from dimensions
+   * Industry-standard video ad dimensions:
+   * - Mobile: 640x360, 854x480, 960x540 (landscape), 360x640, 414x896 (portrait)
+   * - Tablet: 768x1024, 1024x768
+   * - Desktop: 1280x720, 1920x1080, 2560x1440
+   * - CTV/OTT: 1280x720 (720p), 1920x1080 (1080p), 3840x2160 (4K)
    */
   detectDeviceType(width, height, aspectRatio) {
-    // Mobile portrait (9:16 or similar)
+    // Mobile portrait (aspect ratio < 0.75 means height > width * 1.33)
     if (aspectRatio < 0.75) {
       return 'Mobile Portrait';
     }
 
-    // Mobile landscape (typical phone dimensions)
-    if (width <= 854 && height <= 480) {
+    // CTV/OTT - Check FIRST for exact 16:9 HD/4K dimensions
+    // These are the standard broadcast resolutions
+    if ((width === 1280 && height === 720) ||   // 720p HD
+        (width === 1920 && height === 1080) ||  // 1080p Full HD
+        (width === 3840 && height === 2160) ||  // 4K UHD
+        (width === 2560 && height === 1440)) {  // 1440p QHD (some CTV devices)
+      return 'CTV/OTT';
+    }
+
+    // Mobile landscape - small dimensions
+    if (width <= 960 && height <= 540) {
       return 'Mobile';
     }
 
-    // Tablet / Medium screens
-    if (width <= 1280 && height <= 720) {
-      return 'Tablet/Desktop';
+    // Tablet - medium dimensions (typical tablet ad sizes)
+    if ((width >= 768 && width <= 1024 && height >= 768 && height <= 1024)) {
+      return 'Tablet';
     }
 
-    // CTV/OTT (Roku, Apple TV, Fire TV, etc.) - typically 1920x1080 or 1280x720
-    if ((width === 1920 && height === 1080) || (width === 1280 && height === 720) || (width === 3840 && height === 2160)) {
-      return 'CTV/OTT (Roku, TV)';
-    }
-
-    // Desktop/larger screens
-    if (width >= 1280) {
-      return 'Desktop/CTV';
+    // Desktop - larger dimensions but not exact CTV matches
+    if (width >= 1024) {
+      return 'Desktop';
     }
 
     return 'Other';

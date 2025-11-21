@@ -846,15 +846,19 @@ code, pre, .event-log, .input-field, .media-file-url {
   border: 1px solid rgba(37, 99, 235, 0.4);
 }
 
-.device-badge.device-tabletdesktop,
-.device-badge.device-desktop,
-.device-badge.device-desktopctv {
+.device-badge.device-tablet {
+  background-color: rgba(251, 146, 60, 0.2);
+  color: #fdba74;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+}
+
+.device-badge.device-desktop {
   background-color: rgba(16, 185, 129, 0.2);
   color: #6ee7b7;
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
-.device-badge.device-ctvottrokuty,
+.device-badge.device-ctvott,
 .device-badge.device-ctv {
   background-color: rgba(139, 92, 246, 0.2);
   color: #c4b5fd;

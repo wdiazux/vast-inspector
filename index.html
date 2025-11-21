@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAST Inspector - QA Testing Tool</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>🎬 VAST Inspector</h1>
+      <p class="subtitle">Video Ad Serving Template QA Testing Tool</p>
+    </header>
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-mode">
+        <label class="radio-label">
+          <input type="radio" name="input-mode" id="input-url" checked>
+          <span>VAST URL</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="input-mode" id="input-xml">
+          <span>VAST XML</span>
+        </label>
+      </div>
+
+      <div class="input-container">
+        <textarea
+          id="vast-url-input"
+          class="input-field"
+          placeholder="Enter VAST tag URL here...&#10;Example: https://example.com/vast.xml"
+          rows="3"
+        ></textarea>
+
+        <textarea
+          id="vast-xml-input"
+          class="input-field"
+          placeholder="Paste VAST XML here...&#10;<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#10;<VAST version=&quot;3.0&quot;>&#10;  ...&#10;</VAST>"
+          rows="8"
+          style="display: none;"
+        ></textarea>
+      </div>
+
+      <div class="button-group">
+        <button id="test-button" class="btn btn-primary">Test Ad</button>
+        <button id="clear-button" class="btn btn-secondary">Clear All</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Left Column: Video Player -->
+      <div class="left-column">
+        <section class="player-section">
+          <h2>Video Ad Player</h2>
+          <div class="video-container">
+            <video
+              id="ad-video"
+              class="video-player"
+              controls
+              preload="metadata"
+              poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360'%3E%3Crect fill='%23333' width='640' height='360'/%3E%3Ctext fill='%23999' font-family='Arial' font-size='24' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EVideo ad will appear here%3C/text%3E%3C/svg%3E"
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </section>
+
+        <!-- VAST Info -->
+        <section class="info-section">
+          <div id="vast-info"></div>
+        </section>
+
+        <!-- Event Log -->
+        <section class="log-section">
+          <h2>Event Log</h2>
+          <div id="event-log" class="event-log"></div>
+        </section>
+      </div>
+
+      <!-- Right Column: Tracking Info -->
+      <div class="right-column">
+        <!-- Tracking URLs -->
+        <section class="tracking-section">
+          <div id="tracking-urls" class="tracking-urls"></div>
+        </section>
+
+        <!-- Tracking Pixels -->
+        <section class="pixels-section">
+          <div id="tracking-pixels" class="tracking-pixels"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>VAST Inspector v1.0.0 | Supports VAST 2.0, 3.0, 4.0+</p>
+      <p class="footer-links">
+        <a href="https://www.iab.com/guidelines/vast/" target="_blank">VAST Specification</a>
+        <span>•</span>
+        <a href="https://github.com/wdiazux/vast-inspector" target="_blank">Documentation</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="src/vast-parser.js"></script>
+  <script src="src/tracker.js"></script>
+  <script src="src/video-player.js"></script>
+  <script src="src/ui.js"></script>
+</body>
+</html>

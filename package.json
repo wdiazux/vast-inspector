@@ -1,0 +1,29 @@
+{
+  "name": "vast-inspector",
+  "version": "1.0.0",
+  "description": "VAST (Video Ad Serving Template) Inspector for QA testing - track clicks, impressions, and ad events",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -o",
+    "dev": "npx http-server . -p 8080 -o",
+    "test": "echo \"Tests to be implemented\" && exit 0",
+    "lint": "echo \"Linting to be configured\" && exit 0"
+  },
+  "keywords": [
+    "VAST",
+    "video",
+    "ads",
+    "inspector",
+    "QA",
+    "testing",
+    "tracking"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

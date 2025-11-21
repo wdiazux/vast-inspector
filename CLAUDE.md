@@ -17,52 +17,56 @@ This document provides comprehensive guidance for AI assistants working with the
 ## Repository Overview
 
 **Repository**: vast-inspector
-**Purpose**: [To be documented as the project develops]
+**Purpose**: A comprehensive VAST (Video Ad Serving Template) Inspector for QA testing video advertisements. This tool helps QA engineers and developers inspect VAST XML responses, track ad events, monitor tracking URLs, and validate video ad implementations.
+
+### Key Features
+
+- Parse and validate VAST 2.0, 3.0, and 4.0+ XML responses
+- Real-time tracking of impression URLs, click URLs, and event trackers
+- Monitor tracking pixels and their firing status
+- Video ad preview with full event monitoring
+- Support for wrapped VAST tags
+- Comprehensive event logging with timestamps
 
 ### Technology Stack
 
-[To be updated as technologies are added to the project]
-
-- Language: [e.g., TypeScript, Python, Go]
-- Runtime: [e.g., Node.js, Python 3.x]
-- Framework: [e.g., React, Express, FastAPI]
-- Build Tools: [e.g., Webpack, Vite, esbuild]
-- Testing: [e.g., Jest, pytest, Vitest]
-- Linting: [e.g., ESLint, Pylint, golangci-lint]
+- **Language**: JavaScript (ES6+)
+- **Runtime**: Browser (HTML5)
+- **Architecture**: Vanilla JavaScript with modular class-based design
+- **Video**: HTML5 Video API
+- **XML Parsing**: DOMParser API
+- **Development Server**: http-server (Node.js)
+- **No Build Process**: Direct HTML/CSS/JS for simplicity
 
 ## Project Structure
 
 ```
 vast-inspector/
-├── src/                    # Source code
-│   ├── components/        # Reusable components
-│   ├── services/          # Business logic and services
-│   ├── utils/             # Utility functions
-│   ├── types/             # Type definitions
-│   └── config/            # Configuration files
-├── tests/                 # Test files
-│   ├── unit/             # Unit tests
-│   ├── integration/      # Integration tests
-│   └── e2e/              # End-to-end tests
-├── docs/                  # Documentation
-├── scripts/               # Build and utility scripts
-├── .github/              # GitHub workflows and configurations
-└── dist/                 # Build output (git-ignored)
+├── index.html              # Main application UI
+├── src/                    # Source code (JavaScript modules)
+│   ├── vast-parser.js     # VAST XML parser (supports v2.0, 3.0, 4.0+)
+│   ├── tracker.js         # Tracking URL and pixel manager
+│   ├── video-player.js    # Video player controller & event handler
+│   └── ui.js              # UI controller and DOM management
+├── styles/                 # Stylesheets
+│   └── main.css           # Main application styles
+├── package.json           # Project metadata and scripts
+├── README.md              # User documentation
+├── CLAUDE.md              # AI assistant guide (this file)
+└── .gitignore             # Git ignore rules
 ```
-
-**Note**: This structure will be updated as the project evolves.
 
 ## Development Setup
 
 ### Prerequisites
 
-[To be documented when dependencies are established]
-
 ```bash
-# Example prerequisites:
-# - Node.js >= 18.x
-# - npm >= 9.x or yarn >= 1.22.x
-# - Python >= 3.9 (if applicable)
+# Required:
+- Node.js >= 14.0.0 (only for dev server)
+- npm (for installing http-server)
+
+# Optional:
+- Any modern web browser (Chrome, Firefox, Safari, Edge)
 ```
 
 ### Installation
@@ -78,29 +82,19 @@ npm install
 yarn install
 ```
 
-### Environment Configuration
-
-[Document environment variables and configuration files]
-
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit .env with your local configuration
-```
-
 ### Running the Project
 
 ```bash
-# Development mode
+# Start development server (opens browser automatically)
+npm start
+# or
 npm run dev
 
-# Build for production
-npm run build
-
-# Run production build
-npm start
+# The inspector will be available at:
+# http://localhost:8080
 ```
+
+**No build step required!** The application runs directly in the browser using vanilla JavaScript modules.
 
 ## Code Conventions
 
@@ -114,45 +108,63 @@ npm start
 
 ### Naming Conventions
 
-- **Files**: Use kebab-case for file names (e.g., `user-service.ts`)
-- **Classes**: Use PascalCase (e.g., `UserService`)
-- **Functions**: Use camelCase (e.g., `getUserById`)
+- **Files**: Use kebab-case for file names (e.g., `vast-parser.js`, `video-player.js`)
+- **Classes**: Use PascalCase (e.g., `VASTParser`, `VideoPlayer`, `Tracker`)
+- **Functions**: Use camelCase (e.g., `parseVAST`, `fireTracker`, `loadAd`)
 - **Constants**: Use UPPER_SNAKE_CASE (e.g., `MAX_RETRY_ATTEMPTS`)
-- **Interfaces/Types**: Use PascalCase with descriptive names (e.g., `UserProfile`)
+- **CSS Classes**: Use kebab-case with BEM-like structure (e.g., `tracking-section`, `pixel-item`)
 
 ### Code Style
 
-[To be defined based on linting configuration]
-
-```typescript
-// Example: Preferred function style
-export function getUserById(id: string): Promise<User> {
-  // Implementation
+```javascript
+// Use ES6+ features
+// Preferred: async/await over promises
+async function parseVAST(url) {
+  const response = await fetch(url);
+  return response.text();
 }
 
-// Example: Preferred interface style
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  createdAt: Date;
+// Preferred: Arrow functions for callbacks
+trackingURLs.forEach(url => {
+  this.fireTracker(url);
+});
+
+// Preferred: Destructuring
+const { impressions, clicks, tracking } = this.trackingURLs;
+
+// Preferred: Template literals
+console.log(`[Tracker] Fired ${type}: ${url}`);
+
+// Document all public methods with JSDoc
+/**
+ * Parse VAST XML from URL or string
+ * @param {string} vastInput - VAST URL or XML string
+ * @param {boolean} isXML - true if input is XML string
+ * @returns {Promise<Object>} Parsed VAST data
+ */
+async parse(vastInput, isXML = false) {
+  // Implementation
 }
 ```
 
-### Import Organization
+### Module Organization
 
-```typescript
-// 1. External dependencies
-import React from 'react';
-import { useState } from 'react';
+**Note**: This project uses vanilla JavaScript without module bundlers. Scripts are loaded via `<script>` tags in HTML.
 
-// 2. Internal modules (absolute imports)
-import { UserService } from '@/services/user-service';
-import { logger } from '@/utils/logger';
+```html
+<!-- Load modules in correct order (dependencies first) -->
+<script src="src/vast-parser.js"></script>
+<script src="src/tracker.js"></script>
+<script src="src/video-player.js"></script>
+<script src="src/ui.js"></script>
+```
 
-// 3. Relative imports
-import { UserCard } from './UserCard';
-import type { UserProps } from './types';
+**Class exports**: Each module should export classes for browser compatibility:
+```javascript
+// At the end of each module
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ClassName;
+}
 ```
 
 ## Development Workflows
@@ -262,13 +274,14 @@ npm test path/to/test.spec.ts
 
 ### Important Source Files
 
-[To be updated as key files are created]
-
 | File | Purpose |
 |------|---------|
-| `src/index.ts` | Application entry point |
-| `src/config/` | Configuration management |
-| `src/types/` | Shared type definitions |
+| `index.html` | Main UI and application entry point |
+| `src/vast-parser.js` | Parses VAST XML, extracts ad info, impressions, clicks, tracking events |
+| `src/tracker.js` | Manages tracking URL firing, pixel monitoring, logging |
+| `src/video-player.js` | Controls video playback, monitors events, fires quartile tracking |
+| `src/ui.js` | UI controller, coordinates all components, handles user input |
+| `styles/main.css` | All application styles (dark theme, responsive design) |
 
 ## Common Tasks
 
@@ -337,39 +350,105 @@ Before completing a task, verify:
 ### Helpful Commands for AI Assistants
 
 ```bash
-# Check for type errors
-npm run type-check
+# Start development server
+npm start
 
-# Run linter
-npm run lint
+# Test the application
+# Open http://localhost:8080 in browser
+# Use browser DevTools Console to check for errors
+# Use Network tab to monitor tracking requests
 
-# Fix auto-fixable lint issues
-npm run lint:fix
+# Check JavaScript syntax
+node --check src/*.js
 
-# Format code
-npm run format
+# View file structure
+ls -R
 
-# Run all quality checks
-npm run check-all
+# Search for specific code
+grep -r "pattern" src/
 ```
 
 ## Project-Specific Notes
 
 ### Architecture Decisions
 
-[Document important architectural decisions as they are made]
+1. **Vanilla JavaScript Over Frameworks**: Chose vanilla JS for simplicity, portability, and zero build process. Makes it easy to deploy anywhere.
+
+2. **Class-Based Modules**: Uses ES6 classes for clear separation of concerns:
+   - `VASTParser`: Pure parsing logic
+   - `Tracker`: State management for tracking
+   - `VideoPlayer`: Video control and event handling
+   - `UIController`: DOM manipulation and user interaction
+
+3. **Event-Driven Communication**: Uses browser's native event system (`CustomEvent`) for communication between modules.
+
+4. **Tracking via Image Objects**: Uses `new Image()` for firing tracking pixels (most reliable cross-browser method).
+
+### VAST Specification Notes
+
+**Supported VAST Versions**:
+- VAST 2.0: Basic linear ads
+- VAST 3.0: Wrappers, companions
+- VAST 4.0+: Enhanced tracking
+
+**Key VAST Elements Parsed**:
+- `<Impression>`: Fired when ad loads
+- `<ClickThrough>`: Landing page URL
+- `<ClickTracking>`: Click tracking URLs
+- `<Tracking event="">`: Quartile events (start, firstQuartile, midpoint, thirdQuartile, complete)
+- `<Error>`: Error reporting URLs
+- `<MediaFile>`: Video file sources
+- `<VASTAdTagURI>`: Wrapped VAST tags (parsed but not automatically followed)
 
 ### Performance Considerations
 
-[Document performance-critical areas and optimization strategies]
+- **DOM Updates**: Batched where possible to minimize reflows
+- **Event Log**: Limited to 100 entries to prevent memory issues
+- **Tracking Requests**: Fired asynchronously with 5s timeout
+- **Video Formats**: Prefers MP4 (best browser support), falls back to WebM/OGG
 
 ### Security Considerations
 
-[Document security requirements and sensitive areas]
+1. **CORS**: VAST URLs must support CORS or be served from same origin
+2. **Mixed Content**: HTTPS pages can only load HTTPS VAST/media
+3. **XSS Prevention**: All URLs displayed are not executed, only shown as text/links
+4. **Tracking Privacy**: All tracking requests visible in UI and browser DevTools
 
 ### Known Issues and Limitations
 
-[Document current limitations or technical debt]
+1. **VAST Wrappers**: Currently displays wrapped tags but doesn't automatically follow them (manual copy/paste needed)
+2. **VPAID**: Limited support - only detects VPAID media files but doesn't execute them
+3. **Companion Ads**: Parsed but not displayed (future enhancement)
+4. **CORS Restrictions**: Cannot test VAST URLs that don't allow cross-origin requests
+5. **Autoplay Restrictions**: Browser autoplay policies may prevent automatic video playback
+
+### Common VAST Testing Scenarios
+
+#### Test Case 1: Basic Linear Ad
+```javascript
+// Expected tracking sequence:
+1. Impression URLs fire immediately
+2. "start" event when video begins
+3. "firstQuartile" at 25% progress
+4. "midpoint" at 50% progress
+5. "thirdQuartile" at 75% progress
+6. "complete" when video ends
+```
+
+#### Test Case 2: Click Tracking
+```javascript
+// When user clicks video:
+1. ClickTracking URLs fire
+2. ClickThrough URL opens in new tab
+3. "click" event logged
+```
+
+#### Test Case 3: Error Handling
+```javascript
+// When video fails to load:
+1. Error URLs fire (if present)
+2. Error event logged with details
+```
 
 ---
 

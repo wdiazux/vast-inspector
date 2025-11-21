@@ -307,11 +307,20 @@ class UIController {
       `;
       tracking.impressions.forEach(imp => {
         const url = typeof imp === 'string' ? imp : imp.url;
+
+        // Validate URL
+        if (!this.validateURL(url)) {
+          console.warn('Invalid impression URL:', url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(url);
+        const displayURL = this.truncateURL(url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
-            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -327,13 +336,22 @@ class UIController {
       `;
       tracking.clicks.forEach(click => {
         const url = typeof click === 'string' ? click : click.url;
+
+        // Validate URL
+        if (!this.validateURL(url)) {
+          console.warn('Invalid click URL:', url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(url);
         const type = click.type || 'click';
+        const displayURL = this.truncateURL(url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
             <span class="tracking-type"><i class="fas fa-tag"></i> ${type}</span>
-            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -348,12 +366,20 @@ class UIController {
           <ul class="url-list">
       `;
       tracking.tracking.forEach(track => {
+        // Validate URL
+        if (!this.validateURL(track.url)) {
+          console.warn('Invalid tracking URL:', track.url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(track.url);
+        const displayURL = this.truncateURL(track.url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${track.url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
             <span class="tracking-type"><i class="fas fa-bolt"></i> ${track.event}</span>
-            <a href="${track.url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(track.url)}</a>
+            <a href="${track.url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -368,11 +394,19 @@ class UIController {
           <ul class="url-list">
       `;
       tracking.errors.forEach(url => {
+        // Validate URL
+        if (!this.validateURL(url)) {
+          console.warn('Invalid error URL:', url);
+          return;
+        }
+
         const fired = this.tracker.hasFired(url);
+        const displayURL = this.truncateURL(url);
+
         html += `
-          <li class="${fired ? 'fired' : ''}">
+          <li class="${fired ? 'fired' : ''}" title="${url}">
             <i class="fas ${fired ? 'fa-check-circle' : 'fa-circle'} status-icon"></i>
-            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${this.truncateURL(url)}</a>
+            <a href="${url}" target="_blank" class="url-link" rel="noopener noreferrer">${displayURL}</a>
           </li>
         `;
       });
@@ -492,8 +526,55 @@ class UIController {
    * Truncate URL for display
    */
   truncateURL(url, maxLength = 80) {
+    if (!url) return '';
+
+    // Decode URL for better readability
+    try {
+      url = decodeURIComponent(url);
+    } catch (e) {
+      // If decoding fails, use original URL
+      console.warn('Failed to decode URL:', url);
+    }
+
     if (url.length <= maxLength) return url;
     return url.substring(0, maxLength - 3) + '...';
+  }
+
+  /**
+   * Safely encode URL if needed
+   */
+  encodeURLSafely(url) {
+    if (!url) return '';
+
+    try {
+      // Check if URL is already encoded by trying to decode it
+      const decoded = decodeURIComponent(url);
+      // If decoding changes the URL, it was encoded
+      if (decoded !== url) {
+        return url; // Already encoded
+      }
+      // Otherwise encode it
+      return encodeURIComponent(url);
+    } catch (e) {
+      // If decoding fails, assume it's not properly encoded
+      return url;
+    }
+  }
+
+  /**
+   * Validate and sanitize tracking URL
+   */
+  validateURL(url) {
+    if (!url || typeof url !== 'string') return false;
+
+    try {
+      // Try to create a URL object to validate
+      new URL(url);
+      return true;
+    } catch (e) {
+      console.warn('Invalid URL:', url, e);
+      return false;
+    }
   }
 }
 

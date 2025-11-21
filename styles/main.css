@@ -527,6 +527,96 @@ section h4 {
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Media Files Display */
+.media-files-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.media-file-item {
+  padding: 15px;
+  background-color: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.media-file-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.media-file-index {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.device-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.device-badge.device-mobile,
+.device-badge.device-mobileportrait {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(37, 99, 235, 0.4);
+}
+
+.device-badge.device-tabletdesktop,
+.device-badge.device-desktop,
+.device-badge.device-desktopctv {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.device-badge.device-ctvottrokuty,
+.device-badge.device-ctv {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.device-badge.device-other {
+  background-color: rgba(100, 116, 139, 0.2);
+  color: var(--text-secondary);
+  border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+.media-file-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+}
+
+.media-file-details span {
+  color: var(--text-secondary);
+}
+
+.media-file-details strong {
+  color: var(--text-color);
+  margin-right: 5px;
+}
+
+.media-file-url {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  word-break: break-all;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -543,5 +633,10 @@ section h4 {
 
   .info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .media-file-details {
+    flex-direction: column;
+    gap: 5px;
   }
 }

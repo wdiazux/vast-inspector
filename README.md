@@ -2,6 +2,8 @@
 
 A comprehensive VAST (Video Ad Serving Template) Inspector tool for QA testing and debugging video advertisements. Track clicks, impressions, tracking pixels, and monitor ad events in real-time.
 
+🌐 **Live Demo Available via GitHub Pages** (see deployment instructions below)
+
 ## Features
 
 - 📺 **VAST XML Parser** - Parse and validate VAST 2.0, 3.0, and 4.0+ responses
@@ -11,17 +13,31 @@ A comprehensive VAST (Video Ad Serving Template) Inspector tool for QA testing a
 - 📊 **Event Logging** - Real-time logging of all ad events with timestamps
 - 🔗 **VAST Wrapper Support** - Handle wrapped VAST tags and follow redirects
 - 📱 **Responsive UI** - Works on desktop and mobile devices
+- 🚀 **No Installation Required** - Use directly from GitHub Pages
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Use GitHub Pages (Recommended)
 
+Simply visit: **https://[your-username].github.io/vast-inspector/**
+
+No installation required! Works directly in your browser.
+
+(Replace `[your-username]` with your GitHub username after deployment)
+
+### Option 2: Run Locally
+
+**Prerequisites:**
 - Node.js >= 14.0.0
 - npm or yarn
 
-### Installation
+**Installation:**
 
 ```bash
+# Clone the repository
+git clone https://github.com/[your-username]/vast-inspector.git
+cd vast-inspector
+
 # Install dependencies
 npm install
 
@@ -30,6 +46,10 @@ npm start
 ```
 
 The inspector will open automatically in your browser at `http://localhost:8080`
+
+### Option 3: Open Directly
+
+Simply open `index.html` in your browser. No server needed!
 
 ## Usage
 
@@ -96,6 +116,29 @@ vast-inspector/
 ├── package.json
 └── README.md
 ```
+
+## GitHub Pages Deployment
+
+This project is configured to work as a GitHub Pages site out of the box.
+
+### Automatic Deployment
+
+1. **Enable GitHub Pages:**
+   - Go to your repository settings
+   - Navigate to "Pages" section
+   - Under "Source", select the branch you want to deploy (e.g., `main` or `master`)
+   - Click "Save"
+
+2. **Access your site:**
+   - Your VAST Inspector will be available at: `https://[your-username].github.io/vast-inspector/`
+   - Replace `[your-username]` with your actual GitHub username
+
+### Manual Deployment
+
+The project works directly from the repository with no build step required:
+- `index.html` is the entry point
+- All assets are in `src/` and `styles/`
+- `.nojekyll` file prevents Jekyll processing
 
 ## Development
 

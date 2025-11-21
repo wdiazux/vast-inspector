@@ -167,12 +167,129 @@ class UIController {
             <strong>Media Files:</strong> ${linearCreative.data.mediaFiles.length}
           </div>
         `;
+
+        // Add device-specific media file breakdown
+        const deviceTypes = this.categorizeMediaFilesByDevice(linearCreative.data.mediaFiles);
+        if (deviceTypes.length > 0) {
+          html += `
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <strong>Device Support:</strong> ${deviceTypes.join(', ')}
+            </div>
+          `;
+        }
       }
+
+      // Display media files with device detection
+      html += this.displayMediaFiles(ad.inline.creatives);
     }
 
     html += `</div>`;
 
     this.vastInfoDiv.innerHTML = html;
+  }
+
+  /**
+   * Categorize media files by device type based on dimensions
+   */
+  categorizeMediaFilesByDevice(mediaFiles) {
+    const devices = new Set();
+
+    mediaFiles.forEach(mf => {
+      const width = parseInt(mf.width) || 0;
+      const height = parseInt(mf.height) || 0;
+
+      if (width && height) {
+        const aspectRatio = width / height;
+        const deviceType = this.detectDeviceType(width, height, aspectRatio);
+        if (deviceType) {
+          devices.add(deviceType);
+        }
+      }
+    });
+
+    return Array.from(devices);
+  }
+
+  /**
+   * Detect device type from dimensions
+   */
+  detectDeviceType(width, height, aspectRatio) {
+    // Mobile portrait (9:16 or similar)
+    if (aspectRatio < 0.75) {
+      return 'Mobile Portrait';
+    }
+
+    // Mobile landscape (typical phone dimensions)
+    if (width <= 854 && height <= 480) {
+      return 'Mobile';
+    }
+
+    // Tablet / Medium screens
+    if (width <= 1280 && height <= 720) {
+      return 'Tablet/Desktop';
+    }
+
+    // CTV/OTT (Roku, Apple TV, Fire TV, etc.) - typically 1920x1080 or 1280x720
+    if ((width === 1920 && height === 1080) || (width === 1280 && height === 720) || (width === 3840 && height === 2160)) {
+      return 'CTV/OTT (Roku, TV)';
+    }
+
+    // Desktop/larger screens
+    if (width >= 1280) {
+      return 'Desktop/CTV';
+    }
+
+    return 'Other';
+  }
+
+  /**
+   * Display media files with device information
+   */
+  displayMediaFiles(creatives) {
+    let html = '<div style="grid-column: 1 / -1; margin-top: 15px;">';
+    html += '<h4>Available Media Files</h4>';
+
+    creatives.forEach(creative => {
+      if (creative.type === 'linear' && creative.data.mediaFiles) {
+        html += '<div class="media-files-list">';
+
+        creative.data.mediaFiles.forEach((mf, index) => {
+          const width = mf.width || '?';
+          const height = mf.height || '?';
+          const type = mf.type || 'unknown';
+          const bitrate = mf.bitrate ? `${mf.bitrate}kbps` : 'N/A';
+          const aspectRatio = (parseInt(mf.width) && parseInt(mf.height))
+            ? (parseInt(mf.width) / parseInt(mf.height)).toFixed(2)
+            : 'N/A';
+
+          const deviceType = this.detectDeviceType(
+            parseInt(mf.width) || 0,
+            parseInt(mf.height) || 0,
+            parseFloat(aspectRatio) || 0
+          );
+
+          html += `
+            <div class="media-file-item">
+              <div class="media-file-header">
+                <span class="media-file-index">#${index + 1}</span>
+                <span class="device-badge device-${deviceType.toLowerCase().replace(/[^a-z]/g, '')}">${deviceType}</span>
+              </div>
+              <div class="media-file-details">
+                <span><strong>Type:</strong> ${type}</span>
+                <span><strong>Size:</strong> ${width}x${height} (${aspectRatio}:1)</span>
+                <span><strong>Bitrate:</strong> ${bitrate}</span>
+              </div>
+              <div class="media-file-url">${this.truncateURL(mf.url, 80)}</div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+      }
+    });
+
+    html += '</div>';
+    return html;
   }
 
   /**

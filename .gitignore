@@ -26,3 +26,9 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+
+# Local testing (DO NOT COMMIT real VAST URLs)
+local-test-urls.txt
+local-vast-examples/
+test-credentials.json
+*-local.*

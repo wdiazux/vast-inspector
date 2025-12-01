@@ -159,8 +159,9 @@ class UIController {
 
       const linearCreative = ad.inline.creatives.find(c => c.type === 'linear');
       if (linearCreative) {
-        // Check for VPAID creatives
+        // Check for VPAID and SIMID creatives
         const hasVPAID = linearCreative.data.mediaFiles.some(mf => mf.isVPAID);
+        const hasSIMID = linearCreative.data.mediaFiles.some(mf => mf.isSIMID);
 
         html += `
           <div class="info-item">
@@ -171,8 +172,22 @@ class UIController {
           </div>
         `;
 
-        // Show VPAID warning
-        if (hasVPAID) {
+        // Show SIMID warning (higher priority than VPAID)
+        if (hasSIMID) {
+          html += `
+            <div class="info-item" style="grid-column: 1 / -1;">
+              <div class="warning-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>SIMID Interactive Ad Detected:</strong> This VAST tag contains SIMID (Secure Interactive Media Interface Definition) creatives with interactive buttons and JavaScript elements. SIMID ads require a SIMID-compatible player and cannot be played in this basic inspector.
+                <br><br>
+                <strong>What is SIMID?</strong> Interactive ads with clickable buttons, forms, and JavaScript interactions (not just video).
+                <br>
+                <strong>To test SIMID ads:</strong> Use Google IMA SDK with SIMID support or dedicated SIMID testing tools.
+              </div>
+            </div>
+          `;
+        } else if (hasVPAID) {
+          // Show VPAID warning only if no SIMID
           html += `
             <div class="info-item" style="grid-column: 1 / -1;">
               <div class="warning-banner">
@@ -292,16 +307,24 @@ class UIController {
             parseFloat(aspectRatio) || 0
           );
 
-          // Check if VPAID
-          const vpaidBadge = mf.isVPAID ? '<span class="vpaid-badge"><i class="fas fa-code"></i> VPAID</span>' : '';
+          // Check if SIMID or VPAID
+          let specialBadge = '';
+          let specialClass = '';
+          if (mf.isSIMID) {
+            specialBadge = '<span class="simid-badge"><i class="fas fa-hand-pointer"></i> SIMID Interactive</span>';
+            specialClass = 'simid-creative';
+          } else if (mf.isVPAID) {
+            specialBadge = '<span class="vpaid-badge"><i class="fas fa-code"></i> VPAID</span>';
+            specialClass = 'vpaid-creative';
+          }
           const apiFramework = mf.apiFramework ? `<span><strong>API:</strong> ${mf.apiFramework}</span>` : '';
 
           html += `
-            <div class="media-file-item ${mf.isVPAID ? 'vpaid-creative' : ''}">
+            <div class="media-file-item ${specialClass}">
               <div class="media-file-header">
                 <span class="media-file-index">#${index + 1}</span>
                 <span class="device-badge device-${deviceType.toLowerCase().replace(/[^a-z]/g, '')}">${deviceType}</span>
-                ${vpaidBadge}
+                ${specialBadge}
               </div>
               <div class="media-file-details">
                 <span><strong>Type:</strong> ${type}</span>

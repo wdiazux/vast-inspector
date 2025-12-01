@@ -325,6 +325,38 @@ class VASTParser {
       });
     });
 
+    // Parse InteractiveCreativeFile (SIMID/VPAID creatives)
+    const interactiveElements = linearElement.querySelectorAll('InteractiveCreativeFile');
+    interactiveElements.forEach(icf => {
+      const apiFramework = icf.getAttribute('apiFramework');
+      const type = icf.getAttribute('type') || null;
+
+      // Detect SIMID
+      const isSIMID = apiFramework === 'SIMID' ||
+                      (apiFramework && apiFramework.toLowerCase().includes('simid'));
+
+      // Detect VPAID
+      const isVPAID = apiFramework === 'VPAID' ||
+                      type === 'application/x-shockwave-flash' ||
+                      type === 'application/javascript';
+
+      linear.mediaFiles.push({
+        id: icf.getAttribute('id') || null,
+        delivery: 'progressive',
+        type: type,
+        width: null, // Interactive creatives are typically fullscreen
+        height: null,
+        codec: null,
+        bitrate: null,
+        apiFramework: apiFramework || null,
+        isVPAID: isVPAID,
+        isSIMID: isSIMID,
+        isInteractive: true, // Flag to identify InteractiveCreativeFile
+        variableDuration: icf.getAttribute('variableDuration') === 'true',
+        url: icf.textContent.trim()
+      });
+    });
+
     // Parse VideoClicks
     const videoClicksElement = linearElement.querySelector('VideoClicks');
     if (videoClicksElement) {

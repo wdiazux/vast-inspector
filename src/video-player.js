@@ -152,18 +152,33 @@ class VideoPlayer {
       console.warn('[VideoPlayer] SIMIDBridge not available - basic iframe only');
     }
 
+    // Add iframe error handler
+    this.simidIframe.addEventListener('error', (e) => {
+      console.error('[VideoPlayer] SIMID iframe error:', e);
+      this.logEvent('error', 'SIMID iframe failed to load');
+    }, { once: true });
+
     // Load SIMID URL in iframe
+    console.log('[VideoPlayer] Loading SIMID creative:', mediaFile.url);
     this.simidIframe.src = mediaFile.url;
 
-    console.log('[VideoPlayer] Loaded SIMID creative:', mediaFile.url);
-    this.logEvent('simid-loaded', 'SIMID interactive creative loaded in iframe');
+    this.logEvent('simid-loaded', `SIMID creative loading: ${mediaFile.url.substring(0, 80)}...`);
 
     // Initialize SIMID protocol after iframe loads
     if (this.simidBridge) {
       this.simidIframe.addEventListener('load', () => {
-        console.log('[VideoPlayer] SIMID iframe loaded, initializing protocol...');
+        console.log('[VideoPlayer] SIMID iframe DOM loaded, initializing protocol...');
+        this.logEvent('simid-ready', 'SIMID iframe loaded, initializing protocol');
         this.simidBridge.initializeCreative();
       }, { once: true });
+
+      // Timeout check - if nothing happens after 5 seconds
+      setTimeout(() => {
+        console.warn('[VideoPlayer] SIMID iframe timeout - check if creative is responding');
+        this.logEvent('warning', 'SIMID iframe loaded but may not be responding - check console for SIMID bridge messages');
+      }, 5000);
+    } else {
+      console.warn('[VideoPlayer] No SIMID bridge available');
     }
   }
 

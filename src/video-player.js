@@ -7,6 +7,8 @@ class VideoPlayer {
     this.video = videoElement;
     this.tracker = tracker;
     this.clickOverlay = document.getElementById('video-click-overlay');
+    this.simidIframe = document.getElementById('simid-iframe');
+    this.isSIMID = false; // Track if current ad is SIMID
     this.vastData = null;
     this.trackingURLs = null;
     this.quartilesFired = {
@@ -58,16 +60,31 @@ class VideoPlayer {
       return false;
     }
 
-    // Set up video
-    this.video.src = mediaFile.url;
-    this.setupEventListeners();
+    // Check if this is a SIMID interactive creative
+    if (mediaFile.isSIMID && mediaFile.isInteractive) {
+      // Load SIMID in iframe
+      this.loadSIMID(mediaFile);
+      this.isSIMID = true;
+    } else {
+      // Load regular video
+      this.video.src = mediaFile.url;
+      this.setupEventListeners();
 
-    // Enable click overlay for click tracking
-    if (this.clickOverlay) {
+      // Show video, hide iframe
+      this.video.classList.remove('hidden');
+      if (this.simidIframe) {
+        this.simidIframe.classList.add('hidden');
+      }
+
+      this.isSIMID = false;
+    }
+
+    // Enable click overlay for click tracking (only for regular video)
+    if (this.clickOverlay && !this.isSIMID) {
       this.clickOverlay.classList.remove('disabled');
     }
 
-    this.logEvent('ad-loaded', `Ad loaded: ${ad.inline.adTitle || 'Untitled'}`);
+    this.logEvent('ad-loaded', `Ad loaded: ${ad.inline.adTitle || 'Untitled'}${this.isSIMID ? ' (SIMID Interactive)' : ''}`);
 
     // Fire impression trackers with initial context
     const context = this.getVideoContext();
@@ -82,6 +99,13 @@ class VideoPlayer {
    * @returns {Object|null} Selected media file
    */
   selectMediaFile(mediaFiles) {
+    // Prioritize SIMID interactive creatives if present
+    const simidFile = mediaFiles.find(mf => mf.isSIMID && mf.isInteractive);
+    if (simidFile) {
+      console.log('[VideoPlayer] SIMID interactive creative found, prioritizing');
+      return simidFile;
+    }
+
     // Preferred MIME types in order
     const preferredTypes = [
       'video/mp4',
@@ -98,6 +122,31 @@ class VideoPlayer {
 
     // Fallback to first available
     return mediaFiles[0] || null;
+  }
+
+  /**
+   * Load SIMID interactive creative in iframe
+   * @param {Object} mediaFile - SIMID media file object
+   */
+  loadSIMID(mediaFile) {
+    if (!this.simidIframe) {
+      console.error('[VideoPlayer] SIMID iframe element not found');
+      return;
+    }
+
+    // Hide video, show iframe
+    this.video.classList.add('hidden');
+    this.simidIframe.classList.remove('hidden');
+
+    // Load SIMID URL in iframe
+    this.simidIframe.src = mediaFile.url;
+
+    console.log('[VideoPlayer] Loaded SIMID creative:', mediaFile.url);
+    this.logEvent('simid-loaded', 'SIMID interactive creative loaded in iframe');
+
+    // Note: We're not implementing the full SIMID API protocol here.
+    // This is a basic implementation that allows viewing/interacting with the SIMID creative.
+    // Full SIMID requires implementing EnvironmentData, MediaSession, and messaging protocol.
   }
 
   /**
@@ -351,11 +400,21 @@ class VideoPlayer {
     this.video.src = '';
     this.removeEventListeners();
 
+    // Reset SIMID iframe
+    if (this.simidIframe) {
+      this.simidIframe.src = '';
+      this.simidIframe.classList.add('hidden');
+    }
+
+    // Show video, hide iframe
+    this.video.classList.remove('hidden');
+
     // Disable click overlay
     if (this.clickOverlay) {
       this.clickOverlay.classList.add('disabled');
     }
 
+    this.isSIMID = false;
     this.vastData = null;
     this.trackingURLs = null;
     this.quartilesFired = {

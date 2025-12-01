@@ -103,7 +103,12 @@ class UIController {
         return;
       }
 
-      this.showStatus(`VAST ${result.version} loaded successfully`, 'success');
+      // Show warning if XML was auto-fixed
+      if (result.xmlAutoFixed) {
+        this.showStatus(`VAST ${result.version} loaded successfully\n⚠️ Warning: Invalid XML was automatically fixed (unescaped & characters in URLs)\nThe ad server should fix this by using &amp; instead of & in XML.`, 'warning');
+      } else {
+        this.showStatus(`VAST ${result.version} loaded successfully`, 'success');
+      }
 
       // Display VAST info
       this.displayVASTInfo(result);
@@ -172,17 +177,17 @@ class UIController {
           </div>
         `;
 
-        // Show SIMID warning (higher priority than VPAID)
+        // Show SIMID info (higher priority than VPAID)
         if (hasSIMID) {
           html += `
             <div class="info-item" style="grid-column: 1 / -1;">
-              <div class="warning-banner">
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>SIMID Interactive Ad Detected:</strong> This VAST tag contains SIMID (Secure Interactive Media Interface Definition) creatives with interactive buttons and JavaScript elements. SIMID ads require a SIMID-compatible player and cannot be played in this basic inspector.
+              <div class="warning-banner" style="background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent); border-left-color: var(--primary-color);">
+                <i class="fas fa-info-circle"></i>
+                <strong>SIMID Interactive Ad Detected:</strong> This VAST tag contains SIMID (Secure Interactive Media Interface Definition) creatives with interactive buttons and JavaScript elements.
                 <br><br>
                 <strong>What is SIMID?</strong> Interactive ads with clickable buttons, forms, and JavaScript interactions (not just video).
                 <br>
-                <strong>To test SIMID ads:</strong> Use Google IMA SDK with SIMID support or dedicated SIMID testing tools.
+                <strong>Inspector Support:</strong> ✅ Basic SIMID viewing is supported - the interactive creative will load in an iframe. You can interact with buttons and elements. Full SIMID API protocol (two-way messaging) is not implemented.
               </div>
             </div>
           `;

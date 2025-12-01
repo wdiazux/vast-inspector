@@ -53,13 +53,44 @@ class VASTParser {
         }
       }
 
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+      // Try to parse XML first
+      let parser = new DOMParser();
+      let xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+      let xmlAutoFixed = false;
 
       // Check for XML parsing errors
-      const parserError = xmlDoc.querySelector('parsererror');
+      let parserError = xmlDoc.querySelector('parsererror');
       if (parserError) {
-        throw new Error('Invalid XML: ' + parserError.textContent);
+        // Try to auto-fix common XML issues
+        console.warn('[VAST Parser] XML parsing failed, attempting auto-fix...');
+
+        // Check if error mentions "EntityRef: expecting ';'"
+        const errorText = parserError.textContent;
+        if (errorText.includes('EntityRef') || errorText.includes('expecting')) {
+          // Likely unescaped ampersands in URLs - try to fix
+          console.log('[VAST Parser] Detected unescaped ampersands, fixing...');
+
+          // Fix unescaped ampersands in URLs
+          // Match URLs inside XML tags and escape & to &amp; (but not already escaped ones)
+          xmlString = xmlString.replace(
+            /(https?:\/\/[^<>"{}|\\^`\[\]\s]*?)&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)/g,
+            '$1&amp;'
+          );
+
+          // Try parsing again
+          xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+          parserError = xmlDoc.querySelector('parsererror');
+
+          if (!parserError) {
+            console.log('[VAST Parser] ✓ Auto-fix successful! XML is now valid.');
+            xmlAutoFixed = true;
+          }
+        }
+
+        // If still has error, throw
+        if (parserError) {
+          throw new Error('Invalid XML: ' + parserError.textContent + '\n\n💡 TIP: The VAST XML has syntax errors. Common issues:\n- Unescaped & characters in URLs (should be &amp;)\n- Missing CDATA sections\n- Invalid XML characters');
+        }
       }
 
       // Check if it's a VAST document
@@ -86,7 +117,8 @@ class VASTParser {
         success: true,
         version: vastVersion,
         data: this.vastData,
-        tracking: this.trackingURLs
+        tracking: this.trackingURLs,
+        xmlAutoFixed: xmlAutoFixed
       };
 
     } catch (error) {
@@ -290,6 +322,38 @@ class VASTParser {
         isVPAID: isVPAID,
         isSIMID: isSIMID,
         url: mf.textContent.trim()
+      });
+    });
+
+    // Parse InteractiveCreativeFile (SIMID/VPAID creatives)
+    const interactiveElements = linearElement.querySelectorAll('InteractiveCreativeFile');
+    interactiveElements.forEach(icf => {
+      const apiFramework = icf.getAttribute('apiFramework');
+      const type = icf.getAttribute('type') || null;
+
+      // Detect SIMID
+      const isSIMID = apiFramework === 'SIMID' ||
+                      (apiFramework && apiFramework.toLowerCase().includes('simid'));
+
+      // Detect VPAID
+      const isVPAID = apiFramework === 'VPAID' ||
+                      type === 'application/x-shockwave-flash' ||
+                      type === 'application/javascript';
+
+      linear.mediaFiles.push({
+        id: icf.getAttribute('id') || null,
+        delivery: 'progressive',
+        type: type,
+        width: null, // Interactive creatives are typically fullscreen
+        height: null,
+        codec: null,
+        bitrate: null,
+        apiFramework: apiFramework || null,
+        isVPAID: isVPAID,
+        isSIMID: isSIMID,
+        isInteractive: true, // Flag to identify InteractiveCreativeFile
+        variableDuration: icf.getAttribute('variableDuration') === 'true',
+        url: icf.textContent.trim()
       });
     });
 

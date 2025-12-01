@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VAST version="4.2">
+  <Ad id="simid-test-ad">
+    <InLine>
+      <AdSystem>SIMID Test Server</AdSystem>
+      <AdTitle>SIMID Interactive Ad - Desktop</AdTitle>
+      <Description>Test SIMID ad with interactive elements</Description>
+
+      <!-- Impression tracking -->
+      <Impression><![CDATA[https://track.example.com/impression?id=simid-123&cb=[CACHEBUSTER]]]></Impression>
+
+      <Creatives>
+        <Creative id="simid-creative-001">
+          <Linear>
+            <Duration>00:00:30</Duration>
+
+            <!-- Tracking Events -->
+            <TrackingEvents>
+              <Tracking event="start"><![CDATA[https://track.example.com/start?id=simid-123]]></Tracking>
+              <Tracking event="firstQuartile"><![CDATA[https://track.example.com/q1?id=simid-123]]></Tracking>
+              <Tracking event="midpoint"><![CDATA[https://track.example.com/mid?id=simid-123]]></Tracking>
+              <Tracking event="thirdQuartile"><![CDATA[https://track.example.com/q3?id=simid-123]]></Tracking>
+              <Tracking event="complete"><![CDATA[https://track.example.com/comp?id=simid-123]]></Tracking>
+            </TrackingEvents>
+
+            <!-- SIMID Media File - Desktop 1920x1080 -->
+            <MediaFiles>
+              <MediaFile
+                delivery="progressive"
+                type="text/html"
+                apiFramework="SIMID"
+                width="1920"
+                height="1080">
+                <![CDATA[https://interactive-ads.example.com/simid/creative-v4.2.html]]>
+              </MediaFile>
+
+              <!-- Fallback standard video for non-SIMID players -->
+              <MediaFile
+                delivery="progressive"
+                type="video/mp4"
+                width="1920"
+                height="1080"
+                bitrate="5000">
+                <![CDATA[https://cdn.example.com/ads/video-fallback-1080p.mp4]]>
+              </MediaFile>
+            </MediaFiles>
+
+            <!-- Video Clicks -->
+            <VideoClicks>
+              <ClickThrough><![CDATA[https://advertiser.example.com/landing?utm_source=simid&utm_medium=video]]></ClickThrough>
+              <ClickTracking><![CDATA[https://track.example.com/click?id=simid-123&cb=[CACHEBUSTER]]]></ClickTracking>
+            </VideoClicks>
+          </Linear>
+        </Creative>
+      </Creatives>
+
+      <Extensions>
+        <Extension type="SIMID">
+          <SIMIDVersion>1.1</SIMIDVersion>
+          <CreativeParams>
+            <![CDATA[{"productId":"ABC123","ctaText":"Shop Now","interactiveButtons":true}]]>
+          </CreativeParams>
+        </Extension>
+      </Extensions>
+    </InLine>
+  </Ad>
+</VAST>

@@ -528,7 +528,9 @@ class UIController {
    * Show status message
    */
   showStatus(message, type = 'info') {
-    this.statusDiv.textContent = message;
+    // Replace \n with <br> for multi-line messages
+    const formattedMessage = message.replace(/\n/g, '<br>');
+    this.statusDiv.innerHTML = formattedMessage;
     this.statusDiv.className = `status status-${type}`;
   }
 

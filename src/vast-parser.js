@@ -28,11 +28,29 @@ class VASTParser {
         xmlString = vastInput;
       } else {
         // Fetch VAST from URL
-        const response = await fetch(vastInput);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch VAST: ${response.status} ${response.statusText}`);
+        try {
+          const response = await fetch(vastInput);
+          if (!response.ok) {
+            // Provide helpful error messages based on status code
+            if (response.status === 403) {
+              throw new Error(`CORS/Access Denied (403): The VAST server is blocking this request. This usually happens because:\n\n1. CORS Policy: Server doesn't allow requests from this origin\n2. Referrer Check: Server requires specific referrer headers\n3. Authentication: Server requires API keys or tokens\n\n💡 WORKAROUND: Copy the VAST XML response and paste it using the "VAST XML" option instead.`);
+            } else if (response.status === 404) {
+              throw new Error(`VAST Not Found (404): The URL doesn't exist or the creative ID is invalid.`);
+            } else if (response.status === 500) {
+              throw new Error(`Server Error (500): The VAST server is experiencing issues. Try again later.`);
+            } else {
+              throw new Error(`Failed to fetch VAST: ${response.status} ${response.statusText}`);
+            }
+          }
+          xmlString = await response.text();
+        } catch (fetchError) {
+          // Network errors (no response at all)
+          if (fetchError.message.includes('Failed to fetch') || fetchError.name === 'TypeError') {
+            throw new Error(`Network Error: Cannot connect to VAST server. This could be:\n\n1. CORS Policy: Server doesn't allow cross-origin requests\n2. Network Issue: Server is down or unreachable\n3. SSL/Certificate Issue: Mixed content (HTTP vs HTTPS)\n\n💡 WORKAROUND: Open the URL in a new tab, copy the XML, and paste it using the "VAST XML" option.`);
+          }
+          // Re-throw our custom errors
+          throw fetchError;
         }
-        xmlString = await response.text();
       }
 
       const parser = new DOMParser();

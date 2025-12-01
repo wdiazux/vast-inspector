@@ -274,6 +274,10 @@ class VASTParser {
                       type === 'application/x-shockwave-flash' ||
                       type === 'application/javascript';
 
+      // Detect SIMID (Secure Interactive Media Interface Definition)
+      const isSIMID = apiFramework === 'SIMID' ||
+                      (apiFramework && apiFramework.toLowerCase().includes('simid'));
+
       linear.mediaFiles.push({
         id: mf.getAttribute('id') || null,
         delivery: mf.getAttribute('delivery') || 'progressive',
@@ -284,6 +288,7 @@ class VASTParser {
         bitrate: mf.getAttribute('bitrate') || null,
         apiFramework: apiFramework || null,
         isVPAID: isVPAID,
+        isSIMID: isSIMID,
         url: mf.textContent.trim()
       });
     });

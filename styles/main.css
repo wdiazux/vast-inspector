@@ -976,6 +976,31 @@ code, pre, .event-log, .input-field, .media-file-url {
   background: linear-gradient(90deg, rgba(245, 158, 11, 0.05), transparent);
 }
 
+/* SIMID Badge - Interactive Ads */
+.simid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.1));
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.simid-badge i {
+  font-size: 0.875rem;
+}
+
+.media-file-item.simid-creative {
+  border-left: 3px solid var(--primary-color);
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), transparent);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {

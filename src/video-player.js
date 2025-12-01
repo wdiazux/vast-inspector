@@ -9,6 +9,7 @@ class VideoPlayer {
     this.clickOverlay = document.getElementById('video-click-overlay');
     this.simidIframe = document.getElementById('simid-iframe');
     this.isSIMID = false; // Track if current ad is SIMID
+    this.simidBridge = null; // SIMID protocol bridge
     this.vastData = null;
     this.trackingURLs = null;
     this.quartilesFired = {
@@ -138,15 +139,32 @@ class VideoPlayer {
     this.video.classList.add('hidden');
     this.simidIframe.classList.remove('hidden');
 
+    // Create SIMID bridge for protocol communication
+    if (typeof SIMIDBridge !== 'undefined') {
+      this.simidBridge = new SIMIDBridge(
+        this.simidIframe,
+        this.video,
+        this.tracker,
+        this.trackingURLs
+      );
+      console.log('[VideoPlayer] SIMID bridge created');
+    } else {
+      console.warn('[VideoPlayer] SIMIDBridge not available - basic iframe only');
+    }
+
     // Load SIMID URL in iframe
     this.simidIframe.src = mediaFile.url;
 
     console.log('[VideoPlayer] Loaded SIMID creative:', mediaFile.url);
     this.logEvent('simid-loaded', 'SIMID interactive creative loaded in iframe');
 
-    // Note: We're not implementing the full SIMID API protocol here.
-    // This is a basic implementation that allows viewing/interacting with the SIMID creative.
-    // Full SIMID requires implementing EnvironmentData, MediaSession, and messaging protocol.
+    // Initialize SIMID protocol after iframe loads
+    if (this.simidBridge) {
+      this.simidIframe.addEventListener('load', () => {
+        console.log('[VideoPlayer] SIMID iframe loaded, initializing protocol...');
+        this.simidBridge.initializeCreative();
+      }, { once: true });
+    }
   }
 
   /**
@@ -399,6 +417,12 @@ class VideoPlayer {
     this.pause();
     this.video.src = '';
     this.removeEventListeners();
+
+    // Destroy SIMID bridge
+    if (this.simidBridge) {
+      this.simidBridge.destroy();
+      this.simidBridge = null;
+    }
 
     // Reset SIMID iframe
     if (this.simidIframe) {

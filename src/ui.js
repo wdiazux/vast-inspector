@@ -103,7 +103,12 @@ class UIController {
         return;
       }
 
-      this.showStatus(`VAST ${result.version} loaded successfully`, 'success');
+      // Show warning if XML was auto-fixed
+      if (result.xmlAutoFixed) {
+        this.showStatus(`VAST ${result.version} loaded successfully\n⚠️ Warning: Invalid XML was automatically fixed (unescaped & characters in URLs)\nThe ad server should fix this by using &amp; instead of & in XML.`, 'warning');
+      } else {
+        this.showStatus(`VAST ${result.version} loaded successfully`, 'success');
+      }
 
       // Display VAST info
       this.displayVASTInfo(result);
